@@ -1,30 +1,41 @@
 import heapq
 
 
-def _sift_up(heap: list[int], startpos:int, endpos:int):
-    n: int = startpos
-    while n < endpos:
-        switch = n
-        if 2*n+1 < len(heap) and heap[2*n+1] < heap[switch]:
-            switch = 2*n+1
-        if 2*n+2 < len(heap) and heap[2*n+2] < heap[switch]:
-            switch = 2*n+2
-        if switch == n:
-            break
-        tmp = heap[n]
-        heap[n] = heap[switch]
-        heap[switch] = tmp
-        n = switch
+# sift up the array
+def _sift_up(heap: list[int], pos:int):
+    newitem:int = heap[pos]
+    endpos:int = len(heap)
+    startpos:int = pos
+    
+    childpos:int = 2*pos+1
+    while childpos < endpos:
+        rightpos:int = childpos+1
+        if rightpos < endpos and not heap[childpos] < heap[rightpos]:
+            childpos = rightpos
+
+        heap[pos] = heap[childpos]
+        pos = childpos
+        childpos = 2*pos+1
+    heap[pos] = newitem
+
+    _sift_down(heap, startpos, pos)
 
 
-def _shift_down(heap: list[int], startpos:int, endpos:int):
-    n: int = startpos
-    while n > endpos and heap[(n-1)//2] > heap[n]:
-        tmp = heap[n]
-        heap[n] = heap[(n-1)//2]
-        heap[(n-1)//2] = tmp
-        n = (n-1)//2
+# sift down the array
+def _sift_down(heap: list[int], startpos:int, pos: int):
+    newitem:int = heap[pos]
 
+    while pos > startpos:
+        parentpos = (pos-1) >> 1
+        parent = heap[parentpos]
+        if newitem < parent:
+            heap[pos] = parent
+            pos = parentpos
+            continue
+
+        break
+    heap[pos] = newitem    
+        
 
 def heappush(heap: list[int], item: int) -> list[int]:
     """
@@ -33,7 +44,7 @@ def heappush(heap: list[int], item: int) -> list[int]:
     or if the parent node is of bigger value.
     """
     heap.append(item)
-    _shift_down(heap, len(heap)-1, 0)
+    _sift_down(heap, 0, len(heap)-1)
     
     return heap
 
@@ -42,11 +53,15 @@ def heappop(heap: list[int]) -> int:
         return heap.pop() 
     min_val = heap[0]
     heap[0] = heap.pop()
-    _shift_up(heap, 0, len(heap))
+    _sift_up(heap, 0)
     
     return min_val
 
+def heapify(heap:list[int]):
+    n = len(heap)
 
+    for i in reversed(range(n//2)):
+        _sift_up(heap, i)
 
 
 
